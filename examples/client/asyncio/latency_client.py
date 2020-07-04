@@ -2,6 +2,8 @@ import asyncio
 import time
 import socketio
 
+IMG_PATH='received.txt'
+
 loop = asyncio.get_event_loop()
 sio = socketio.AsyncClient()
 start_timer = None
@@ -20,16 +22,21 @@ async def connect():
 
 
 @sio.event
-async def pong_from_server():
+async def pong_from_server(data):
+    print('Received pong from server.')
     global start_timer
-    latency = time.time() - start_timer
-    print('latency is {0:.2f} ms'.format(latency * 1000))
+    # print(data)
+    # latency = time.time() - start_timer
+    # print('latency is {0:.2f} ms'.format(latency * 1000))
+    image_data = data['image_data']
+    with open(IMG_PATH, 'wb') as file:
+        file.write(image_data)
     await sio.sleep(1)
     await send_ping()
 
 
 async def start_server():
-    await sio.connect('http://localhost:5000')
+    await sio.connect('http://localhost:8080')
     await sio.wait()
 
 
